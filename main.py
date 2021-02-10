@@ -4,24 +4,33 @@ import requests
 import sys
 import os
 
-coords = '133.125502,-28.306867'
-scale = 1
+coords = [133, -28]
+scale = 3
+
+
+def tuple_to_str(tpl):
+    return f'{tpl[0]},{tpl[1]}'
 
 
 def load_image(f=False):
-    map_request = f"http://static-maps.yandex.ru/1.x/?ll={coords}&spn={(width / scale) / 10},{(height / scale) / 10}&l=sat&size={width},{height}"
+    global scale
+    map_request = f"http://static-maps.yandex.ru/1.x/?ll={tuple_to_str(coords)}" \
+                  f"&z={scale}&l=sat,skl&size={tuple_to_str((round(width / 2), round(height / 2)))}"
     response = requests.get(map_request)
 
     if not response:
         print("Ошибка выполнения запроса:")
         print(map_request)
         print("Http статус:", response.status_code, "(", response.reason, ")")
-        sys.exit(1)
+        scale -= 1
+        return
 
     if f:
         os.remove(map_file)
     with open(map_file, "wb") as file:
         file.write(response.content)
+
+    return True
 
 
 load_image()
@@ -29,26 +38,41 @@ load_image()
 pg.init()
 sc = pg.display.set_mode(size)
 
+font = pg.font.Font(None, 24)
+
 pg.display.set_caption('3Gis')
 
 while True:
-    load_image(True)
-    sc.blit(pg.image.load(map_file), (0, 0))
+    if load_image(True):
+        sc.blit(pg.transform.scale(pg.image.load(map_file), size), (0, 0))
+    sc.blit(font.render(tuple_to_str(coords), False, red), (10, 10))
 
     for event in pg.event.get():
         if event.type == pg.QUIT:
             os.remove(map_file)
             exit(0)
         elif event.type == pg.KEYDOWN:
-            if event.key == pg.K_PAGEDOWN:
-                scale //= 2
-            elif event.key == pg.K_PAGEUP:
-                scale *= 2
-
-    if scale > 1024:
-        scale = 1024
-    elif scale < 1:
-        scale = 1
+            if event.key in {pg.K_PAGEDOWN, pg.K_PAGEUP}:
+                scale += -1 if event.key == pg.K_PAGEDOWN else 1
+                if scale > 17:
+                    scale = 17
+                elif scale < 0:
+                    scale = 0
+                print(scale)
+            elif event.key in {pg.K_LEFT, pg.K_RIGHT}:
+                x = mtsh / scale**4
+                coords[0] += x if event.key == pg.K_RIGHT else -x
+                if coords[0] > 180:
+                    coords[0] = -180
+                elif coords[0] < -180:
+                    coords[0] = 180
+            elif event.key in {pg.K_UP, pg.K_DOWN}:
+                x = mtsh / scale**4
+                coords[1] += x if event.key == pg.K_UP else -x
+                if coords[1] < -85:
+                    coords[1] = -85
+                # elif coords[1] < 0:
+                #     coords[1] = 180
 
     pg.display.flip()
 
