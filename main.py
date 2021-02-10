@@ -45,7 +45,7 @@ pg.display.set_caption('3Gis')
 while True:
     if load_image(True):
         sc.blit(pg.transform.scale(pg.image.load(map_file), size), (0, 0))
-    sc.blit(font.render(tuple_to_str(coords), False, red), (10, 10))
+    # sc.blit(font.render(tuple_to_str(coords), False, red), (10, 10))
 
     for event in pg.event.get():
         if event.type == pg.QUIT:
@@ -58,7 +58,6 @@ while True:
                     scale = 17
                 elif scale < 0:
                     scale = 0
-                print(scale)
             elif event.key in {pg.K_LEFT, pg.K_RIGHT}:
                 x = mtsh / scale**4
                 coords[0] += x if event.key == pg.K_RIGHT else -x
