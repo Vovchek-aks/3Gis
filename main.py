@@ -3,6 +3,7 @@ from settings import *
 import requests
 import sys
 import os
+import pygame_gui
 
 coords = [133, -28]
 scale = 3
@@ -15,7 +16,7 @@ def tuple_to_str(tpl):
 def load_image(f=False):
     global scale
     map_request = f"http://static-maps.yandex.ru/1.x/?ll={tuple_to_str(coords)}" \
-                  f"&z={scale}&l=sat,skl&size={tuple_to_str((round(width / 2), round(height / 2)))}"
+                  f"&z={scale}&l=sat,skl&size={tuple_to_str((600, 450))}"
     response = requests.get(map_request)
 
     if not response:
@@ -38,8 +39,13 @@ load_image()
 pg.init()
 sc = pg.display.set_mode(size)
 
+manager = pygame_gui.UIManager(size, os.path.join('menu_theme.json'))
+outlook_btn = pygame_gui.elements.UIButton(
+    relative_rect=pg.Rect((10, 10), (100, 30)),
+    text='гибрид',
+    manager=manager)
+outlook_btn.set_text('Аня гей')
 font = pg.font.Font(None, 24)
-
 pg.display.set_caption('3Gis')
 
 while True:
@@ -59,20 +65,19 @@ while True:
                 elif scale < 0:
                     scale = 0
             elif event.key in {pg.K_LEFT, pg.K_RIGHT}:
-                x = mtsh / scale**4
+                x = mtsh / scale ** 4
                 coords[0] += x if event.key == pg.K_RIGHT else -x
                 if coords[0] > 180:
                     coords[0] = -180
                 elif coords[0] < -180:
                     coords[0] = 180
             elif event.key in {pg.K_UP, pg.K_DOWN}:
-                x = mtsh / scale**4
+                x = mtsh / scale ** 4
                 coords[1] += x if event.key == pg.K_UP else -x
                 if coords[1] < -85:
                     coords[1] = -85
                 # elif coords[1] < 0:
                 #     coords[1] = 180
-
+    manager.update(FPS / 1000)
+    manager.draw_ui(sc)
     pg.display.flip()
-
-

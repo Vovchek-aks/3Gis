@@ -1,6 +1,6 @@
 
-
-size = width, height = 1200, 900
+FPS = 60
+size = width, height = 800, 600
 map_file = "map.png"
 
 mtsh = 200
