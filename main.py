@@ -10,6 +10,7 @@ scale = 3
 x = 1
 
 
+
 def tuple_to_str(tpl):
     return f'{tpl[0]},{tpl[1]}'
 
