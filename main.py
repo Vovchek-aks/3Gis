@@ -10,7 +10,6 @@ scale = 3
 x = 1
 
 
-
 def tuple_to_str(tpl):
     return f'{tpl[0]},{tpl[1]}'
 
@@ -18,7 +17,7 @@ def tuple_to_str(tpl):
 def load_image(f=False):
     global scale
     map_request = f"http://static-maps.yandex.ru/1.x/?ll={tuple_to_str(coords)}" \
-                  f"&z={scale}&l={sat[x]},skl&size={tuple_to_str((600, 450))}"
+                  f"&z={scale}&l={sat[x]}&size={tuple_to_str((600, 450))}"
     response = requests.get(map_request)
 
     if not response:
@@ -71,11 +70,11 @@ while True:
         if event.type == pg.QUIT:
             os.remove(map_file)
             exit(0)
-        elif event.type == pg.USEREVENT:
-            if event.user_type == 3:
-                if event.ui_element == outlook_btn:
-                    change_name()
-        elif event.type == pg.KEYDOWN:
+        # if event.type == pg.USEREVENT:
+        #     if event.user_type == 3:
+        #         if event.ui_element == outlook_btn:
+        #             change_name()
+        if event.type == pg.KEYDOWN:
             if event.key in {pg.K_PAGEDOWN, pg.K_PAGEUP}:
                 scale += -1 if event.key == pg.K_PAGEDOWN else 1
                 if scale > 17:

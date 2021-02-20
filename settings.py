@@ -1,6 +1,6 @@
 
 FPS = 60
-sat = ['map', 'sat&', 'sat%2Cskl&']
+sat = ['map', 'sat', 'sat,skl']
 size = width, height = 800, 600
 map_file = "map.png"
 
