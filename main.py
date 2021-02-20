@@ -7,6 +7,7 @@ import pygame_gui
 
 coords = [133, -28]
 scale = 3
+x = 1
 
 
 def tuple_to_str(tpl):
@@ -16,7 +17,7 @@ def tuple_to_str(tpl):
 def load_image(f=False):
     global scale
     map_request = f"http://static-maps.yandex.ru/1.x/?ll={tuple_to_str(coords)}" \
-                  f"&z={scale}&l=sat,skl&size={tuple_to_str((600, 450))}"
+                  f"&z={scale}&l={sat[x]},skl&size={tuple_to_str((600, 450))}"
     response = requests.get(map_request)
 
     if not response:
@@ -35,12 +36,16 @@ def load_image(f=False):
 
 
 def change_name():
+    global x
     if outlook_btn.text == 'гибрид':
         outlook_btn.set_text('схема')
+        x = 2
     elif outlook_btn.text == 'схема':
         outlook_btn.set_text('спутник')
+        x = 0
     elif outlook_btn.text == 'спутник':
         outlook_btn.set_text('гибрид')
+        x = 1
 
 
 load_image()

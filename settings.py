@@ -1,5 +1,6 @@
 
 FPS = 60
+sat = ['map', 'sat&', 'sat%2Cskl&']
 size = width, height = 800, 600
 map_file = "map.png"
 
