@@ -34,6 +34,15 @@ def load_image(f=False):
     return True
 
 
+def change_name():
+    if outlook_btn.text == 'гибрид':
+        outlook_btn.set_text('схема')
+    elif outlook_btn.text == 'схема':
+        outlook_btn.set_text('спутник')
+    elif outlook_btn.text == 'спутник':
+        outlook_btn.set_text('гибрид')
+
+
 load_image()
 
 pg.init()
@@ -44,7 +53,6 @@ outlook_btn = pygame_gui.elements.UIButton(
     relative_rect=pg.Rect((10, 10), (100, 30)),
     text='гибрид',
     manager=manager)
-outlook_btn.set_text('Аня гей')
 font = pg.font.Font(None, 24)
 pg.display.set_caption('3Gis')
 
@@ -57,6 +65,10 @@ while True:
         if event.type == pg.QUIT:
             os.remove(map_file)
             exit(0)
+        elif event.type == pg.USEREVENT:
+            if event.user_type == 3:
+                if event.ui_element == outlook_btn:
+                    change_name()
         elif event.type == pg.KEYDOWN:
             if event.key in {pg.K_PAGEDOWN, pg.K_PAGEUP}:
                 scale += -1 if event.key == pg.K_PAGEDOWN else 1
