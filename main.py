@@ -61,17 +61,19 @@ def tuple_to_str(tpl):
     return f'{tpl[0]},{tpl[1]}'
 
 
-def load_image(f=False):
+def load_image(f=False, ll=None):
     global scale
-    map_request = f"http://static-maps.yandex.ru/1.x/?ll={tuple_to_str(coords)}" \
-                  f"&z={scale}&l={overlook}&size={tuple_to_str((600, 450))}"
+    if ll is not None:
+        map_request = ll
+    else:
+        map_request = link
     response = requests.get(map_request)
 
     if not response:
         print("Ошибка выполнения запроса:")
         print(map_request)
         print("Http статус:", response.status_code, "(", response.reason, ")")
-        scale -= 1
+        scale = 3
         return
 
     if f:
@@ -82,10 +84,14 @@ def load_image(f=False):
     return True
 
 
-load_image()
+link = ''
+
+load_image(ll=f"http://static-maps.yandex.ru/1.x/?ll={tuple_to_str(coords)}" \
+              f"&z={scale}&l={overlook}&size={tuple_to_str((600, 450))}")
 
 pg.init()
 sc = pg.display.set_mode(size)
+
 panel = pg.Surface((width, 55))
 panel.fill((255, 255, 255))
 panel.set_alpha(100)
@@ -96,9 +102,16 @@ pg.display.set_caption('3Gis')
 manager = ElementManager([BabyBtn((10, 10), (100, 35), 'схема', gui_manager)])
 
 while True:
-    if load_image(True):
+
+    old_l = link
+
+    link = f"http://static-maps.yandex.ru/1.x/?ll={tuple_to_str(coords)}" \
+           f"&z={scale}&l={overlook}&size={tuple_to_str((600, 450))}"
+
+    if old_l != link and load_image(True):
         sc.blit(pg.transform.scale(pg.image.load(map_file), size), (0, 0))
     # sc.blit(font.render(tuple_to_str(coords), False, red), (10, 10))
+
     sc.blit(panel, (0, 0))
     for event in pg.event.get():
         manager.manager_event(event)
@@ -110,8 +123,8 @@ while True:
                 scale += -1 if event.key == pg.K_PAGEDOWN else 1
                 if scale > 17:
                     scale = 17
-                elif scale < 0:
-                    scale = 0
+                elif scale < 2:
+                    scale = 2
             elif event.key in {pg.K_LEFT, pg.K_RIGHT}:
                 x = mtsh / scale ** 4
                 coords[0] += x if event.key == pg.K_RIGHT else -x
