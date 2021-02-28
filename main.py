@@ -7,7 +7,54 @@ import pygame_gui
 
 coords = [133, -28]
 scale = 3
-x = 1
+overlook = 'sat,skl'
+
+
+class Button:
+    def __init__(self, pos, btn_size, text, mg, func):
+        self.btn = pygame_gui.elements.UIButton(
+            relative_rect=pg.Rect(pos, btn_size),
+            text=text,
+            manager=mg)
+        self.func = func
+        self.cursor_on_self = False
+
+    def object_event(self, ev):
+        if ev.type == pg.USEREVENT:
+            if ev.ui_element == self.btn:
+                if ev.user_type == 3:
+                    self.cursor_on_self = True
+                elif ev.user_type == 4:
+                    self.cursor_on_self = False
+        elif ev.type == pg.MOUSEBUTTONDOWN:
+            if ev.button == 1 and self.cursor_on_self:
+                self.func()
+
+
+class BabyBtn(Button):
+    def __init__(self, pos, btn_size, text, mg, func=None):
+        super().__init__(pos, btn_size, text, mg, self.change_name)
+
+    def change_name(self):
+        global overlook
+        if self.btn.text == 'схема':
+            self.btn.set_text('спутник')
+            overlook = 'map'
+        elif self.btn.text == 'спутник':
+            self.btn.set_text('гибрид')
+            overlook = 'sat'
+        elif self.btn.text == 'гибрид':
+            self.btn.set_text('схема')
+            overlook = 'sat,skl'
+
+
+class ElementManager:
+    def __init__(self, elements_list):
+        self.elements = elements_list
+
+    def manager_event(self, ev):
+        for i in self.elements:
+            i.object_event(ev)
 
 
 def tuple_to_str(tpl):
@@ -17,7 +64,7 @@ def tuple_to_str(tpl):
 def load_image(f=False):
     global scale
     map_request = f"http://static-maps.yandex.ru/1.x/?ll={tuple_to_str(coords)}" \
-                  f"&z={scale}&l={sat[x]}&size={tuple_to_str((600, 450))}"
+                  f"&z={scale}&l={overlook}&size={tuple_to_str((600, 450))}"
     response = requests.get(map_request)
 
     if not response:
@@ -35,47 +82,30 @@ def load_image(f=False):
     return True
 
 
-def change_name():
-    global x
-    if outlook_btn.text == 'гибрид':
-        outlook_btn.set_text('схема')
-        x = 2
-    elif outlook_btn.text == 'схема':
-        outlook_btn.set_text('спутник')
-        x = 0
-    elif outlook_btn.text == 'спутник':
-        outlook_btn.set_text('гибрид')
-        x = 1
-
-
 load_image()
 
 pg.init()
 sc = pg.display.set_mode(size)
+panel = pg.Surface((width, 55))
+panel.fill((255, 255, 255))
+panel.set_alpha(100)
 
-manager = pygame_gui.UIManager(size, os.path.join('menu_theme.json'))
-outlook_btn = pygame_gui.elements.UIButton(
-    relative_rect=pg.Rect((10, 10), (100, 30)),
-    text='гибрид',
-    manager=manager)
+gui_manager = pygame_gui.UIManager(size, os.path.join('menu_theme.json'))
 font = pg.font.Font(None, 24)
 pg.display.set_caption('3Gis')
+manager = ElementManager([BabyBtn((10, 10), (100, 35), 'схема', gui_manager)])
 
 while True:
     if load_image(True):
         sc.blit(pg.transform.scale(pg.image.load(map_file), size), (0, 0))
     # sc.blit(font.render(tuple_to_str(coords), False, red), (10, 10))
-
-
+    sc.blit(panel, (0, 0))
     for event in pg.event.get():
+        manager.manager_event(event)
         if event.type == pg.QUIT:
             os.remove(map_file)
             exit(0)
-        # if event.type == pg.USEREVENT:
-        #     if event.user_type == 3:
-        #         if event.ui_element == outlook_btn:
-        #             change_name()
-        if event.type == pg.KEYDOWN:
+        elif event.type == pg.KEYDOWN:
             if event.key in {pg.K_PAGEDOWN, pg.K_PAGEUP}:
                 scale += -1 if event.key == pg.K_PAGEDOWN else 1
                 if scale > 17:
@@ -96,6 +126,6 @@ while True:
                     coords[1] = -85
                 # elif coords[1] < 0:
                 #     coords[1] = 180
-    manager.update(FPS / 1000)
-    manager.draw_ui(sc)
+    gui_manager.update(FPS / 1000)
+    gui_manager.draw_ui(sc)
     pg.display.flip()
