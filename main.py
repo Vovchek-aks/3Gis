@@ -112,6 +112,7 @@ while True:
         sc.blit(pg.transform.scale(pg.image.load(map_file), size), (0, 0))
     # sc.blit(font.render(tuple_to_str(coords), False, red), (10, 10))
 
+
     sc.blit(panel, (0, 0))
     for event in pg.event.get():
         manager.manager_event(event)
