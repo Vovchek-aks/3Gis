@@ -66,6 +66,7 @@ while True:
         sc.blit(pg.transform.scale(pg.image.load(map_file), size), (0, 0))
     # sc.blit(font.render(tuple_to_str(coords), False, red), (10, 10))
 
+
     for event in pg.event.get():
         if event.type == pg.QUIT:
             os.remove(map_file)
