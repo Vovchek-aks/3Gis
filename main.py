@@ -6,7 +6,6 @@ import os
 import pygame_gui
 
 coords = [133, -28]
-scale = 3
 overlook = 'sat,skl'
 
 
@@ -57,6 +56,24 @@ class ElementManager:
             i.object_event(ev)
 
 
+class Scaler:
+    def __init__(self, scale=3):
+        self.scale = scale
+
+    def set_scale(self, value):
+        self.scale = value
+        if self.scale > 17:
+            self.scale = 17
+        elif self.scale < 2:
+            self.scale = 2
+
+    def up_scale(self):
+        self.set_scale(self.scale + 1)
+
+    def down_scale(self):
+        self.set_scale(self.scale - 1)
+
+
 def tuple_to_str(tpl):
     return f'{tpl[0]},{tpl[1]}'
 
@@ -73,7 +90,6 @@ def load_image(f=False, ll=None):
         print("Ошибка выполнения запроса:")
         print(map_request)
         print("Http статус:", response.status_code, "(", response.reason, ")")
-        scale = 3
         return
 
     if f:
@@ -84,10 +100,13 @@ def load_image(f=False, ll=None):
     return True
 
 
+scaler = Scaler()
+
+
 link = ''
 
 load_image(ll=f"http://static-maps.yandex.ru/1.x/?ll={tuple_to_str(coords)}" \
-              f"&z={scale}&l={overlook}&size={tuple_to_str((600, 450))}")
+              f"&z={scaler.scale}&l={overlook}&size={tuple_to_str((600, 450))}")
 
 pg.init()
 sc = pg.display.set_mode(size)
@@ -106,13 +125,13 @@ while True:
     old_l = link
 
     link = f"http://static-maps.yandex.ru/1.x/?ll={tuple_to_str(coords)}" \
-           f"&z={scale}&l={overlook}&size={tuple_to_str((600, 450))}"
+           f"&z={scaler.scale}&l={overlook}&size={tuple_to_str((600, 450))}"
 
     if old_l != link and load_image(True):
         sc.blit(pg.transform.scale(pg.image.load(map_file), size), (0, 0))
-    # sc.blit(font.render(tuple_to_str(coords), False, red), (10, 10))
+        sc.blit(panel, (0, 0))
+    # sc.blit(font.render('Ошибка', False, red), (100, height // 2))
 
-    sc.blit(panel, (0, 0))
     for event in pg.event.get():
         manager.manager_event(event)
         if event.type == pg.QUIT:
@@ -120,30 +139,31 @@ while True:
             exit(0)
         elif event.type == pg.MOUSEBUTTONDOWN:
             if event.button == 4:
-                scale -= -1
+                scaler.up_scale()
             elif event.button == 5:
-                scale += -1
+                scaler.down_scale()
+
         elif event.type == pg.KEYDOWN:
             if event.key in {pg.K_PAGEDOWN, pg.K_PAGEUP}:
-                scale += -1 if event.key == pg.K_PAGEDOWN else 1
-                if scale > 17:
-                    scale = 17
-                elif scale < 2:
-                    scale = 2
+                if event.key == pg.K_PAGEUP:
+                    scaler.up_scale()
+                else:
+                    scaler.down_scale()
+
             elif event.key in {pg.K_LEFT, pg.K_RIGHT}:
-                x = mtsh / scale ** 4
+                x = mtsh / scaler.scale ** 4
                 coords[0] += x if event.key == pg.K_RIGHT else -x
                 if coords[0] > 180:
                     coords[0] = -180
                 elif coords[0] < -180:
                     coords[0] = 180
             elif event.key in {pg.K_UP, pg.K_DOWN}:
-                x = mtsh / scale ** 4
+                x = mtsh / scaler.scale ** 4
                 coords[1] += x if event.key == pg.K_UP else -x
-                if coords[1] < -85:
-                    coords[1] = -85
-                # elif coords[1] < 0:
-                #     coords[1] = 180
+                if coords[1] < -70:
+                    coords[1] = -70
+                elif coords[1] > 80:
+                    coords[1] = 80
     gui_manager.update(FPS / 1000)
     gui_manager.draw_ui(sc)
     pg.display.flip()
