@@ -112,13 +112,17 @@ while True:
         sc.blit(pg.transform.scale(pg.image.load(map_file), size), (0, 0))
     # sc.blit(font.render(tuple_to_str(coords), False, red), (10, 10))
 
-
     sc.blit(panel, (0, 0))
     for event in pg.event.get():
         manager.manager_event(event)
         if event.type == pg.QUIT:
             os.remove(map_file)
             exit(0)
+        elif event.type == pg.MOUSEBUTTONDOWN:
+            if event.button == 4:
+                scale -= -1
+            elif event.button == 5:
+                scale += -1
         elif event.type == pg.KEYDOWN:
             if event.key in {pg.K_PAGEDOWN, pg.K_PAGEUP}:
                 scale += -1 if event.key == pg.K_PAGEDOWN else 1
