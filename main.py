@@ -1,7 +1,6 @@
 import pygame as pg
 from settings import *
 import requests
-import sys
 import os
 import pygame_gui
 
@@ -21,21 +20,20 @@ class Button:
     def object_event(self, ev):
         if ev.type == pg.USEREVENT:
             if ev.ui_element == self.btn:
-                if ev.user_type == 3:
-                    self.cursor_on_self = True
-                elif ev.user_type == 4:
-                    self.cursor_on_self = False
+                if ev.type == 32866:
+                    self.cursor_on_self = not self.cursor_on_self
         elif ev.type == pg.MOUSEBUTTONDOWN:
             if ev.button == 1 and self.cursor_on_self:
                 self.func()
 
 
 class BabyBtn(Button):
-    def __init__(self, pos, btn_size, text, mg, func=None):
+    def __init__(self, pos, btn_size, text, mg):
         super().__init__(pos, btn_size, text, mg, self.change_name)
 
     def change_name(self):
         global overlook
+        print(overlook)
         if self.btn.text == 'схема':
             self.btn.set_text('спутник')
             overlook = 'map'
